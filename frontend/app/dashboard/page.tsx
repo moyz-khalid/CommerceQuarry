@@ -85,16 +85,27 @@ export default function Dashboard() {
 
       {/* Quick Action Cards */}
       <h2 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <Link
+          href="/seller-research"
+          className="block p-6 bg-blue-50/60 border-2 border-blue-300 rounded-xl hover:border-blue-500 hover:shadow-md transition group"
+        >
+          <div className="w-10 h-10 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg mb-3 shadow-sm">
+            ⭐
+          </div>
+          <h3 className="font-bold text-blue-900 group-hover:text-blue-700 transition">Walmart Seller Research</h3>
+          <p className="text-xs text-blue-700/80 mt-1">Cross-reference Walmart seller catalogs with Home Depot, Lowe&apos;s, and AliExpress.</p>
+        </Link>
+
         <Link
           href="/new-scan"
-          className="block p-6 bg-white border border-blue-100 rounded-xl hover:border-blue-400 hover:shadow-md transition group"
+          className="block p-6 bg-white border border-gray-200 rounded-xl hover:border-blue-400 hover:shadow-md transition group"
         >
           <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg mb-3 group-hover:bg-blue-600 group-hover:text-white transition">
             +
           </div>
-          <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition">Launch Sourcing Scan</h3>
-          <p className="text-xs text-gray-500 mt-1">Discover Amazon catalog items and automatically match supplier listings.</p>
+          <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition">Standard Sourcing Scan</h3>
+          <p className="text-xs text-gray-500 mt-1">General category &amp; ASIN sourcing.</p>
         </Link>
 
         <Link

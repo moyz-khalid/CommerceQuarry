@@ -39,6 +39,8 @@ def orchestrate_scan(scan_id: UUID) -> None:
             _run_category_scan(scan_id, config, demo)
         elif mode == "seller":
             _run_seller_scan(scan_id, config, demo)
+        elif mode == "walmart_seller":
+            _run_walmart_seller_scan(scan_id, config, demo)
         elif mode == "product":
             _run_product_scan(scan_id, config, demo)
         else:
@@ -109,6 +111,49 @@ def _run_seller_scan(scan_id: UUID, config: dict, demo: bool) -> None:
             scan_id,
             status="failed",
             error_summary=f"Seller inventory retrieval failed: {str(exc)}",
+        )
+        return
+
+    _process_products(scan_id, products, demo, config)
+
+
+def _run_walmart_seller_scan(scan_id: UUID, config: dict, demo: bool) -> None:
+    from app.services.walmart import get_walmart_provider, parse_walmart_seller_url
+
+    seller_id = config.get("seller_id") or ""
+    storefront_url = config.get("storefront_url") or ""
+    provider_type = config.get("provider", "demo")
+    csv_text = config.get("csv_text")
+    limit = int(config.get("max_products", 50))
+    min_price = config.get("min_selling_price")
+    max_price = config.get("max_selling_price")
+
+    provider = get_walmart_provider(provider_type, demo=demo, csv_text=csv_text)
+
+    # Resolve seller ID if given URL
+    target_seller_id = seller_id
+    if not target_seller_id and storefront_url:
+        parsed = parse_walmart_seller_url(storefront_url)
+        if parsed["valid"]:
+            target_seller_id = parsed["seller_id"]
+        else:
+            target_seller_id = "101001"
+    elif not target_seller_id:
+        target_seller_id = "101001"
+
+    try:
+        walmart_products, total = provider.get_seller_products(
+            seller_id=target_seller_id,
+            limit=limit,
+            min_price=min_price,
+            max_price=max_price,
+        )
+        products = [p.to_dict() for p in walmart_products]
+    except Exception as exc:
+        update_scan(
+            scan_id,
+            status="failed",
+            error_summary=f"Walmart seller product retrieval failed: {str(exc)}",
         )
         return
 
@@ -235,17 +280,21 @@ def _process_products(
 
         # ── Build result record ───────────────────────────────────────────────
         result_item = {
-            "asin": product.get("asin", ""),
-            "title": product.get("title", ""),
+            "asin": product.get("walmart_product_id") or product.get("asin", ""),
+            "walmart_product_id": product.get("walmart_product_id") or product.get("asin", ""),
+            "title": product.get("product_title") or product.get("title", ""),
             "brand": product.get("brand"),
             "amazon_price": amazon_price,
-            "url": product.get("url"),
+            "walmart_price": product.get("walmart_price") or amazon_price,
+            "url": product.get("product_url") or product.get("url"),
+            "image_url": product.get("image_url"),
             "upc": product.get("upc"),
             "mpn": product.get("mpn"),
             "supplier_name": candidate.get("supplier_name") if candidate else None,
             "supplier_title": candidate.get("supplier_title") if candidate else None,
+            "supplier_price": float(candidate.get("supplier_price", 0)) if candidate else 0.0,
             "supplier_url": candidate.get("supplier_url") if candidate else None,
-            "simulated": bool(product.get("simulated", demo)),
+            "simulated": bool(product.get("is_demo", product.get("simulated", demo))),
             "match": match_info,
             "profit": profit_info,
         }

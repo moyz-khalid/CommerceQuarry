@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from .api import health_router, scans_router, fee_profiles_router, integrations_router, settings_router
+from .api.walmart_research import router as walmart_research_router
 from .init_db import run_migration
 from .logger import configure_logger
 
@@ -24,6 +25,7 @@ app.include_router(scans_router, prefix="/api", tags=["Scans"])
 app.include_router(fee_profiles_router, prefix="/api", tags=["Fee Profiles"])
 app.include_router(integrations_router, prefix="/api", tags=["Integrations"])
 app.include_router(settings_router, prefix="/api", tags=["Settings"])
+app.include_router(walmart_research_router, prefix="/api", tags=["Walmart Seller Research"])
 
 
 @app.get("/health", tags=["Health"])

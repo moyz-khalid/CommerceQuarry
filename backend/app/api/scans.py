@@ -120,6 +120,14 @@ def create_new_scan(
                 raise HTTPException(400, "seller_config is required for seller mode")
         else:
             cfg = req.seller_config.dict()
+    elif req.mode == "walmart_seller":
+        if not req.walmart_seller_config:
+            if req.config:
+                cfg = dict(req.config)
+            else:
+                cfg = {}
+        else:
+            cfg = req.walmart_seller_config.dict()
     elif req.mode == "product":
         if not req.product_config:
             if req.config:

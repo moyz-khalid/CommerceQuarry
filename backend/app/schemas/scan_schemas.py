@@ -9,7 +9,7 @@ import re
 
 # ─── Enum constants ────────────────────────────────────────────────────────────
 
-SCAN_MODES = {"category", "seller", "product"}
+SCAN_MODES = {"category", "seller", "product", "walmart_seller"}
 
 SCAN_STATUSES = {
     "queued",
@@ -138,14 +138,34 @@ class ProductSourcingConfig(BaseModel):
         return m.group(2) if m else ""
 
 
+# ─── Walmart Seller Research config ───────────────────────────────────────────
+
+class WalmartSellerResearchConfig(BaseModel):
+    seller_id: Optional[str] = None
+    storefront_url: Optional[str] = None
+    provider: str = Field("demo", description="demo | serpapi | apify | csv")
+    max_products: int = Field(50, ge=1, le=1000)
+    suppliers: List[str] = Field(default_factory=lambda: ["home_depot", "lowes", "aliexpress"])
+    fulfillment_methods: List[str] = Field(default_factory=lambda: ["walmart_wfs", "walmart_sf"])
+    min_selling_price: Optional[float] = Field(None, ge=0)
+    max_selling_price: Optional[float] = Field(None, ge=0)
+    min_profit: Optional[float] = Field(None)
+    min_roi: Optional[float] = Field(None)
+    enable_ai_verification: bool = False
+    use_cache: bool = True
+    demo: bool = True
+    csv_text: Optional[str] = None
+
+
 # ─── Generic scan create request ─────────────────────────────────────────────
 
 class ScanCreateRequest(BaseModel):
-    mode: Optional[str] = Field(default="category", description="category | seller | product")
+    mode: Optional[str] = Field(default="category", description="category | seller | product | walmart_seller")
     config: Optional[dict] = None
     category_config: Optional[CategorySourcingConfig] = None
     seller_config: Optional[SellerSourcingConfig] = None
     product_config: Optional[ProductSourcingConfig] = None
+    walmart_seller_config: Optional[WalmartSellerResearchConfig] = None
     demo: bool = False
 
     @root_validator(pre=True)
