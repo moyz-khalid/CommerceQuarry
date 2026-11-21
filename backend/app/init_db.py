@@ -8,7 +8,8 @@ SQL_PATH = Path(__file__).parent.parent / "database" / "migrations" / "001_initi
 async def run_migration():
     db_url = os.getenv("DATABASE_URL")
     if not db_url:
-        raise RuntimeError("DATABASE_URL not set in environment")
+        print("DATABASE_URL not set; running with in-memory store.")
+        return
     conn = await asyncpg.connect(dsn=db_url)
     try:
         sql = SQL_PATH.read_text()
