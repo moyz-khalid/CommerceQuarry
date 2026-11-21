@@ -152,7 +152,14 @@ export default function NewScan() {
       });
       const d = await r.json();
       if (!r.ok) {
-        setError(d.detail || JSON.stringify(d));
+        // d.detail may be a string OR an array of Pydantic validation error objects
+        if (typeof d.detail === "string") {
+          setError(d.detail);
+        } else if (Array.isArray(d.detail)) {
+          setError(d.detail.map((e: any) => e.msg || JSON.stringify(e)).join("; "));
+        } else {
+          setError(JSON.stringify(d));
+        }
         return;
       }
       setScanId(d.id);
@@ -251,14 +258,15 @@ export default function NewScan() {
         {/* Seller Mode */}
         {mode === "seller" && (
           <div className="space-y-3 border rounded p-4 bg-gray-50">
-            <p className="text-xs text-orange-600 font-medium">⚠ Seller inventory retrieval requires a live Amazon provider. Use Demo Mode to test.</p>
+            <p className="text-xs text-blue-600 font-medium">ℹ️ Demo Mode uses simulated seller inventory. Enter any Seller ID or storefront URL to test.</p>
             <label className="block">
-              <span className="text-sm font-medium">Seller ID</span>
+              <span className="text-sm font-medium">Amazon Seller ID</span>
               <input type="text" className="mt-1 block w-full border rounded px-2 py-1" value={sellerId} onChange={e => setSellerId(e.target.value)} placeholder="A1EXAMPLE123456" />
             </label>
             <label className="block">
               <span className="text-sm font-medium">or Storefront URL</span>
-              <input type="url" className="mt-1 block w-full border rounded px-2 py-1" value={storefrontUrl} onChange={e => setStorefrontUrl(e.target.value)} placeholder="https://www.amazon.com/s?me=..." />
+              <input type="url" className="mt-1 block w-full border rounded px-2 py-1" value={storefrontUrl} onChange={e => setStorefrontUrl(e.target.value)} placeholder="https://www.amazon.com/s?me=... or https://www.walmart.com/seller/..." />
+              <span className="text-xs text-gray-400 mt-0.5 block">Supports Amazon and Walmart storefront URLs.</span>
             </label>
             <label className="block">
               <span className="text-sm">Max Products</span>

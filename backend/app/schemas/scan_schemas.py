@@ -91,8 +91,13 @@ class SellerSourcingConfig(BaseModel):
 
     @validator("storefront_url")
     def validate_url(cls, v):
-        if v and not v.startswith("https://www.amazon."):
-            raise ValueError("storefront_url must be an amazon.com or amazon marketplace URL.")
+        if v and not (
+            v.startswith("https://www.amazon.")
+            or v.startswith("https://www.walmart.")
+            or v.startswith("http://")
+            or v.startswith("https://")
+        ):
+            raise ValueError("storefront_url must be a valid URL (amazon.com, walmart.com, or any https URL).")
         return v
 
 
