@@ -267,7 +267,7 @@ export default function ScanResultsPage() {
           matched_count: newResults.filter((r) => r.match.matched).length,
           profitable_count: newResults.filter((r) => r.profit.profitable && r.match.matched).length,
           review_count: newResults.filter(
-            (r) => r.match.manual_review || r.match.final_decision in ["review", "investigation"]
+            (r) => r.match.manual_review || (r.match.final_decision ? ["review", "investigation"].includes(r.match.final_decision) : false)
           ).length,
         };
       });
@@ -651,7 +651,7 @@ export default function ScanResultsPage() {
                   ) : (
                     displayedResults.map((item) => {
                       const isReviewNeeded =
-                        item.match.manual_review || item.match.final_decision in ["review", "investigation"];
+                        Boolean(item.match.manual_review || (item.match.final_decision && ["review", "investigation"].includes(item.match.final_decision)));
 
                       return (
                         <tr
